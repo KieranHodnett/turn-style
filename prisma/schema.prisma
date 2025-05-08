@@ -1,26 +1,20 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-  // Further reading:
-  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
   url      = env("DATABASE_URL")
 }
 
 model Post {
-  postId    Int      @id @default(autoincrement())
+  id        String   @id @default(cuid()) // Changed from postId
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  createdBy   User   @relation(fields: [createdById], references: [userId])
+  createdBy User     @relation(fields: [createdById], references: [id]) // Changed from userId
   createdById String
 
   @@index([name])
@@ -28,42 +22,41 @@ model Post {
 
 // Necessary for Next auth
 model Account {
-  accountId                String  @id @default(cuid())
-  userId                   String
-  type                     String
-  provider                 String
-  providerAccountId        String
-  refresh_token            String? // @db.Text
-  access_token             String? // @db.Text
-  expires_at               Int?
-  token_type               String?
-  scope                    String?
-  id_token                 String? // @db.Text
-  session_state            String?
-  user                     User    @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  refresh_token_expires_in Int?
+  id                String  @id @default(cuid()) // Changed from accountId
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade) // Changed from userId
 
   @@unique([provider, providerAccountId])
 }
 
 model Session {
-  sessionId    String   @id @default(cuid())
+  id           String   @id @default(cuid()) // Changed from sessionId
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade) // Changed from userId
 }
 
 model User {
-  userId        String    @id @default(cuid())
+  id            String    @id @default(cuid()) // Changed from userId
   name          String?
   email         String?   @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
-  posts         Post[]
-  Report        Report[]
+  reports       Report[]
+  Post          Post[]
 }
 
 model VerificationToken {
@@ -75,11 +68,11 @@ model VerificationToken {
 }
 
 model Station {
-  stationId    String   @id @default(cuid())
+  id           String   @id @default(cuid()) // Changed from stationId
   name         String
-  latitude     Float // Alternative if point type is challenging
-  longitude    Float // Alternative if point type is challenging
-  lines        String[] // Array of train lines
+  latitude     Float
+  longitude    Float
+  lines        String[]
   policeRecent Boolean  @default(false)
   reports      Report[]
   createdAt    DateTime @default(now())
@@ -87,12 +80,12 @@ model Station {
 }
 
 model Report {
-  reportId      String   @id @default(cuid())
+  id            String   @id @default(cuid()) // Changed from reportId
   stationId     String
-  station       Station  @relation(fields: [stationId], references: [stationId])
+  station       Station  @relation(fields: [stationId], references: [id]) // Changed from stationId
   text          String
   policePresent Boolean
   createdAt     DateTime @default(now())
   userId        String?
-  user          User?    @relation(fields: [userId], references: [userId])
+  user          User?    @relation(fields: [userId], references: [id]) // Changed from userId
 }
