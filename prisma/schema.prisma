@@ -10,19 +10,19 @@ datasource db {
 }
 
 model Post {
-  id        String   @id @default(cuid()) // Changed from postId
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  createdBy User     @relation(fields: [createdById], references: [id]) // Changed from userId
+  id          String   @id @default(cuid())
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   User     @relation(fields: [createdById], references: [id])
   createdById String
-
+  
   @@index([name])
 }
 
 // Necessary for Next auth
 model Account {
-  id                String  @id @default(cuid()) // Changed from accountId
+  id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -34,21 +34,21 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade) // Changed from userId
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
 
 model Session {
-  id           String   @id @default(cuid()) // Changed from sessionId
+  id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade) // Changed from userId
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
-  id            String    @id @default(cuid()) // Changed from userId
+  id            String    @id @default(cuid())
   name          String?
   email         String?   @unique
   emailVerified DateTime?
@@ -57,6 +57,7 @@ model User {
   sessions      Session[]
   reports       Report[]
   Post          Post[]
+  favorites     UserFavorite[]
 }
 
 model VerificationToken {
@@ -68,24 +69,46 @@ model VerificationToken {
 }
 
 model Station {
-  id           String   @id @default(cuid()) // Changed from stationId
-  name         String
-  latitude     Float
-  longitude    Float
-  lines        String[]
+  id          String   @id @default(cuid())
+  name        String
+  latitude    Float
+  longitude   Float
+  lines       String[]
   policeRecent Boolean  @default(false)
-  reports      Report[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  reports     Report[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  favoritedBy   UserFavorite[]
+  
+  @@index([name])
+  @@index([policeRecent])
 }
 
 model Report {
-  id            String   @id @default(cuid()) // Changed from reportId
+  id            String   @id @default(cuid())
   stationId     String
-  station       Station  @relation(fields: [stationId], references: [id]) // Changed from stationId
-  text          String
+  station       Station  @relation(fields: [stationId], references: [id])
+  content       String   
   policePresent Boolean
   createdAt     DateTime @default(now())
   userId        String?
-  user          User?    @relation(fields: [userId], references: [id]) // Changed from userId
+  user          User?    @relation(fields: [userId], references: [id])
+  
+  @@index([stationId, createdAt]) // Add index for frequent queries
+  @@index([userId])
+  @@index([policePresent, createdAt])
+}
+
+model UserFavorite {
+  id        String   @id @default(cuid())
+  userId    String
+  stationId String
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  station   Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, stationId]) // Prevent duplicate favorites
+  @@index([userId])
+  @@index([stationId])
 }
