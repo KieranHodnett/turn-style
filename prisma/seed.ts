@@ -10,7 +10,7 @@ async function main() {
   try {
     // Fetch data from the API
     const response = await fetch('https://data.ny.gov/resource/39hk-dx4f.json');
-    const stationData = await response.json();
+    const stationData = await response.json() as Array<{ stop_name?: string; gtfs_latitude?: string; gtfs_longitude?: string; georeference?: { coordinates?: [number, number] }; daytime_routes?: string }>;
     
     console.log(`Received response with ${stationData.length} items`);
     
@@ -49,13 +49,13 @@ async function main() {
         }
         
         // Skip stations without valid coordinates
-        if (isNaN(lat) || isNaN(long)) {
+        if (lat === undefined || long === undefined || isNaN(lat) || isNaN(long)) {
           console.log(`Skipping station ${station.stop_name} due to missing coordinates`);
           continue;
         }
         
         // Process train lines
-        let lines = [];
+        let lines: string[] = [];
         if (station.daytime_routes) {
           // Split by spaces (since the example shows "N W")
           lines = station.daytime_routes.split(' ').map(line => line.trim()).filter(line => line);
