@@ -71,7 +71,7 @@ export default function ProfileClient() {
                     {new Date(report.createdAt).toLocaleDateString()}
                   </span>
                 </div>
-                <p className="mb-2">{report.text}</p>
+                <p className="mb-2">{report.content}</p>
                 <div className="text-sm text-gray-600">
                   Police Present: {report.policePresent ? "Yes" : "No"}
                 </div>

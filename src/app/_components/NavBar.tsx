@@ -40,6 +40,17 @@ export default function Navbar() {
               >
                 Map
               </Link>
+              {/* Add Favorites link - only show when authenticated */}
+              {status === "authenticated" && (
+                <Link
+                  href="/favorites"
+                  className={`rounded-md px-3 py-2 ${
+                    isActive("/favorites") ? "bg-indigo-700" : "hover:bg-indigo-500"
+                  }`}
+                >
+                  Favorites
+                </Link>
+              )}
             </div>
           </div>
           
@@ -128,6 +139,19 @@ export default function Navbar() {
             >
               Map
             </Link>
+            
+            {/* Add Favorites link to mobile menu - only show when authenticated */}
+            {status === "authenticated" && (
+              <Link
+                href="/favorites"
+                className={`block rounded-md px-3 py-2 ${
+                  isActive("/favorites") ? "bg-indigo-700" : "hover:bg-indigo-500"
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Favorites
+              </Link>
+            )}
             
             {status === "authenticated" ? (
               <div className="border-t border-indigo-500 pt-2 mt-2">
