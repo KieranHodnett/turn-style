@@ -2,6 +2,7 @@ import { postRouter } from "~/server/api/routers/post";
 import { stationRouter } from "~/server/api/routers/station"; 
 import { reportRouter } from "~/server/api/routers/report"; 
 import { favoriteRouter } from "~/server/api/routers/favorite";
+import { authRouter } from "./routers/auth";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 
@@ -15,6 +16,7 @@ export const appRouter = createTRPCRouter({
   station: stationRouter,
   report: reportRouter,
   favorite: favoriteRouter,
+  auth: authRouter,
 });
 
 // export type definition of API

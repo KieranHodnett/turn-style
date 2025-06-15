@@ -10,6 +10,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import jwt from "jsonwebtoken";
 
 
 import { auth } from "~/server/auth";
@@ -28,11 +29,50 @@ import { db } from "~/server/db";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const session = await auth();
-
+  // Get NextAuth session (for web)
+  let session = await auth();
+  
+  // If no NextAuth session, check for mobile JWT
+  if (!session) {
+    const authHeader = opts.headers.get('Authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.substring(7);
+        console.log('🔍 tRPC: Found mobile JWT, creating session...');
+        
+        // Verify your custom JWT
+        const decoded = jwt.verify(token, process.env.AUTH_SECRET!) as {
+          userId: string;
+          email: string;
+        };
+        
+        // Get user from database
+        const user = await db.user.findUnique({
+          where: { id: decoded.userId },
+        });
+        
+        if (user) {
+          // Create a NextAuth-compatible session object
+          session = {
+            user: {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              image: user.image,
+            },
+            expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          };
+          console.log('✅ tRPC: Mobile session created for:', user.email);
+        }
+      } catch (error) {
+        console.log('❌ tRPC: Mobile JWT verification failed:', error);
+      }
+    }
+  }
+  
   return {
     db,
-    session,
+    session, // Now contains either NextAuth or mobile session
     ...opts,
   };
 };
