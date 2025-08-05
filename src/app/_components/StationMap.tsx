@@ -196,7 +196,6 @@ export default function StationMap({ stations, onReportSubmitted }: StationMapPr
           <div class="mt-1 p-2 bg-gray-50 rounded text-sm">
             <p class="text-gray-800">${report.content}</p>
             <div class="flex justify-between text-xs text-gray-500 mt-1">
-              <span>By: ${report.userName}</span>
               <span>Police: ${report.policePresent ? '✅' : '❌'}</span>
             </div>
             <div class="text-xs text-gray-500">${formatDate(report.createdAt)}</div>
